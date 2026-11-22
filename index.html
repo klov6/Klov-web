@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="Klov" content="Klov web, initial-scale=1.0" />
+  <!-- =====================================================================
+       EDIT HERE / عدّل هنا: عنوان الصفحة في المتصفح
+       Change the browser tab title below.
+       ===================================================================== -->
+  <title>Klov (kl5v) — Personal Portfolio</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts: IBM Plex Sans Arabic & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: متغيرات الخلفية السوداء، التشويش، وإضاءة المربعات
+       - --page-bg: لون الخلفية الأساسي الأسود العميق (#050506).
+       - --page-bg-image: ضع رابط صورة خلفية كاملة مثل url('bg.jpg') أو اتركها none.
+       - --noise-opacity: شدة التنقيط / التشويش الثابت (مثال: 0.04 إلى 0.20).
+       - --box-white-glow: إضاءة خلفية بيضاء بسيطة وناعمة حول المربعات والبطاقات.
+       ===================================================================== */
+    :root {
+      --page-bg: #aca8a8;
+      --page-bg-image: none;
+      --surface-bg: rgba(13, 13, 16, 0.84);
+      --surface-hover: rgba(80, 69, 70, 0.94);
+      --border-subtle: rgba(5, 4, 4, 0.897);
+      --border-strong: rgba(10, 10, 10, 0.863);
+      --text-primary: #070404;
+      --text-muted: #0b0b0e;
+      --noise-opacity: 0.08;
+      --box-white-glow: 0 0 22px -4px rgba(255, 255, 255, 0.14), 0 12px 30px rgba(0, 0, 0, 0.72);
+      --box-white-glow-hover: 0 0 30px -2px rgba(255, 255, 255, 0.24), 0 16px 38px rgba(0, 0, 0, 0.84);
+
+      /* =================================================================
+         EDIT HERE / عدّل هنا: متغيرات صندوق MAIN.SYS أسفل الأفاتار
+         - --mainsys-bg-image: ضع رابط صورة أو مسار محلي مثل url('./mainsys-bg.jpg')
+           أو اتركها none للخلفية الداكنة والمنقّطة.
+         - --mainsys-glow-color: لون الإضاءة البيضاء الضبابية الناعمة حول الصندوق.
+         ================================================================= */
+      --mainsys-bg-image: none;
+      --mainsys-glow-color: rgba(255, 255, 255, 0.32);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--page-bg);
+      color: var(--text-primary);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'IBM Plex Sans Arabic', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--page-bg);
+      color: var(--text-primary);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Optional full-page background image layer */
+    .full-page-bg-media {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      pointer-events: none;
+      background-image: var(--page-bg-image);
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.32;
+    }
+
+    /* Full-viewport animated white snow-dot particle canvas */
+    #snowCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      pointer-events: none;
+      display: block;
+    }
+
+    /* Subtle dither / noise grain overlay */
+    .full-page-grain {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.035) 0%, rgba(5, 5, 6, 0.45) 60%, rgba(5, 5, 6, 0.92) 100%),
+        repeating-radial-gradient(circle at 20% 30%, rgba(255, 255, 255, var(--noise-opacity)) 0, rgba(255, 255, 255, var(--noise-opacity)) 1px, transparent 1px, transparent 4px),
+        repeating-radial-gradient(circle at 80% 72%, rgba(255, 255, 255, calc(var(--noise-opacity) * 0.7)) 0, rgba(255, 255, 255, calc(var(--noise-opacity) * 0.7)) 1px, transparent 1px, transparent 5px);
+      background-size: 100% 100%, 6px 6px, 8px 8px;
+    }
+
+    /* Simple soft white ambient backlight on cards across sections */
+    .glass-card {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--box-white-glow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: border-color 0.22s ease, background-color 0.22s ease, transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .glass-card:hover,
+    .glass-card:focus-visible {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--box-white-glow-hover);
+      outline: none;
+    }
+
+    /* =====================================================================
+       MAIN.SYS DOSSIER BOX STYLING (صندوق بيانات MAIN.SYS)
+       Soft diffuse white outer & inner glow without sharp borders, plus
+       optional background image and subtle noise grain.
+       ===================================================================== */
+    .mainsys-box {
+      position: relative;
+      background-color: rgba(10, 10, 14, 0.88);
+      border-radius: 18px;
+      box-shadow:
+        0 0 28px -2px rgba(255, 255, 255, 0.20),
+        0 0 64px 4px rgba(255, 255, 255, 0.09),
+        0 20px 52px rgba(0, 0, 0, 0.88),
+        inset 0 0 24px rgba(255, 255, 255, 0.04);
+      transition: box-shadow 0.25s ease;
+      overflow: hidden;
+    }
+
+    .mainsys-box:hover {
+      box-shadow:
+        0 0 34px -1px rgba(255, 255, 255, 0.28),
+        0 0 74px 6px rgba(255, 255, 255, 0.13),
+        0 22px 56px rgba(0, 0, 0, 0.92),
+        inset 0 0 28px rgba(255, 255, 255, 0.06);
+    }
+
+    .mainsys-box::before,
+    .mainsys-box::after {
+      content: "";
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      height: 10px;
+      pointer-events: none;
+      z-index: 3;
+      filter: blur(6px);
+      opacity: 0.82;
+      background: radial-gradient(ellipse at center, var(--mainsys-glow-color) 0%, rgba(255, 255, 255, 0.12) 55%, transparent 100%);
+    }
+
+    .mainsys-box::before {
+      top: -3px;
+    }
+
+    .mainsys-box::after {
+      bottom: -3px;
+    }
+
+    .mainsys-halo-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      border-radius: inherit;
+      box-shadow:
+        inset 0 1px 10px rgba(255, 255, 255, 0.20),
+        inset 0 -1px 10px rgba(255, 255, 255, 0.16),
+        inset 1px 0 12px rgba(255, 255, 255, 0.07),
+        inset -1px 0 12px rgba(255, 255, 255, 0.07);
+    }
+
+    .mainsys-bg-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: var(--mainsys-bg-image);
+      background-size: cover;
+      background-position: center;
+      opacity: 0.28;
+      filter: contrast(1.1) brightness(0.65);
+    }
+
+    .mainsys-grain-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(6, 6, 9, 0.72) 0%, rgba(6, 6, 9, 0.84) 100%),
+        repeating-radial-gradient(circle at 25% 35%, rgba(255, 255, 255, calc(var(--noise-opacity) * 1.15)) 0, rgba(255, 255, 255, calc(var(--noise-opacity) * 1.15)) 1px, transparent 1px, transparent 4px);
+      background-size: 100% 100%, 5px 5px;
+    }
+
+    .mainsys-tab {
+      display: inline-block;
+      background-color: rgba(255, 255, 255, 0.06);
+      color: #e2dbdb;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+      border-right: 1px solid rgba(255, 255, 255, 0.12);
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+      box-shadow: 0 4px 16px rgba(255, 255, 255, 0.12);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      padding: 3px 11px 4px;
+      text-transform: uppercase;
+    }
+
+    .mainsys-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      font-family: 'IBM Plex Sans Arabic', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .mainsys-label {
+      color: #a1a1aa;
+      flex-shrink: 0;
+      font-weight: 500;
+    }
+
+    .mainsys-dots {
+      flex: 1 1 auto;
+      min-width: 18px;
+      border-bottom: 1.5px dotted rgba(255, 255, 255, 0.42);
+      transform: translateY(-4px);
+    }
+
+    .mainsys-value {
+      flex-shrink: 0;
+      font-weight: 700;
+      text-align: end;
+    }
+
+    ::-webkit-scrollbar {
+      width: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #050506;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #52525b;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-white selection:text-black">
+  <!-- Optional full-page background image layer -->
+  <div class="full-page-bg-media" aria-hidden="true"></div>
+  <!-- Full-viewport animated white snow-dot particle canvas -->
+  <canvas id="snowCanvas" aria-hidden="true"></canvas>
+  <!-- Subtle dither / noise grain texture overlay -->
+  <div class="full-page-grain" aria-hidden="true"></div>
+
+  <!-- Toast notification banner -->
+  <div id="toastBanner" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 hidden items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/95 border border-white/25 text-white text-xs font-medium shadow-2xl">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toastText">Done</span>
+  </div>
+
+  <!-- ===================================================================
+       CUSTOM RIGHT-CLICK CONTEXT MENU (قائمة الكليك يمين المخصصة)
+       1. Language Toggle (عربي / EN, also bound to F1)
+       2. Discord: kl5v (copies 'kl5v' + optional URL)
+       3. Go Up (smoothly scrolls to top)
+       =================================================================== -->
+  <div
+    id="customContextMenu"
+    role="menu"
+    aria-label="Context Menu"
+    class="fixed z-50 hidden min-w-[225px] rounded-2xl bg-zinc-950/95 border border-white/20 shadow-[0_20px_50px_rgba(0,0,0,0.92),0_0_24px_-4px_rgba(255,255,255,0.16)] backdrop-blur-md p-1.5 text-xs text-white select-none"
+  >
+    <div class="px-3 py-1.5 text-[10px] uppercase tracking-widest text-zinc-500 border-b border-white/10 mb-1 flex items-center justify-between">
+      <span id="ctxMenuHeader">قائمة سريعة</span>
+      <span>F1 / RMB</span>
+    </div>
+
+    <!-- Language Toggle -->
+    <button
+      id="ctxLangBtn"
+      type="button"
+      role="menuitem"
+      onclick="toggleLanguage()"
+      class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white hover:text-black text-zinc-200 transition cursor-pointer text-start"
+    >
+      <span id="ctxLangLabel" class="font-medium">تبديل اللغة (عربي / EN)</span>
+      <span id="ctxLangBadge" class="px-1.5 py-0.5 rounded bg-white/10 text-[10px] font-semibold">EN</span>
+    </button>
+
+    <!-- Discord Account: kl5v -->
+    <button
+      id="ctxDiscordBtn"
+      type="button"
+      role="menuitem"
+      onclick="handleDiscordContextAction()"
+      class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white hover:text-black text-zinc-200 transition cursor-pointer text-start mt-0.5"
+    >
+      <span class="flex items-center gap-2 min-w-0">
+        <svg class="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+        </svg>
+        <span id="ctxDiscordText" class="font-medium truncate">ديسكورد: kl5v</span>
+      </span>
+      <span class="text-[10px] opacity-70">kl5v</span>
+    </button>
+
+    <div class="my-1 border-t border-white/10"></div>
+
+    <!-- Go Up -->
+    <button
+      id="ctxGoUpBtn"
+      type="button"
+      role="menuitem"
+      onclick="scrollToTopFromMenu()"
+      class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white hover:text-black text-zinc-200 transition cursor-pointer text-start"
+    >
+      <span id="ctxGoUpLabel" class="font-medium">Go Up · للأعلى</span>
+      <span>↑</span>
+    </button>
+  </div>
+
+  <!-- Main Single-Column Centered Flow -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6">
+
+    <!-- ===================================================================
+         TOP HERO SECTION (الواجهة العلوية المتمركزة)
+         Includes quick-jump circular icon buttons, site title/bio, clean
+         square avatar (#heroAvatarImage) with zero overlaid text/badges,
+         and MAIN.SYS dossier box directly underneath.
+         =================================================================== -->
+    <header id="top" class="min-h-[92vh] flex flex-col items-center justify-center text-center py-14 sm:py-20">
+      <!-- EDIT HERE / عدّل هنا: أزرار الانتقال السريع الدائرية أعلى الواجهة -->
+      <nav aria-label="Quick Header Icons" class="flex items-center justify-center gap-3.5 mb-7">
+        <a href="#social-media" title="Social Media / سوشل ميديا" class="w-10 h-10 rounded-full border border-white/20 bg-zinc-900/85 hover:bg-white hover:text-black text-white shadow-[0_0_16px_-4px_rgba(255,255,255,0.18)] flex items-center justify-center transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </a>
+        <a href="#tools" title="Tools & Downloads / الأدوات والتحميلات" class="w-10 h-10 rounded-full border border-white/20 bg-zinc-900/85 hover:bg-white hover:text-black text-white shadow-[0_0_16px_-4px_rgba(255,255,255,0.18)] flex items-center justify-center transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </a>
+        <a href="#links" title="Links / الروابط" class="w-10 h-10 rounded-full border border-white/20 bg-zinc-900/85 hover:bg-white hover:text-black text-white shadow-[0_0_16px_-4px_rgba(255,255,255,0.18)] flex items-center justify-center transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+          </svg>
+        </a>
+      </nav>
+
+      <!-- Main Hero Headline (Configured via HERO_CONTENT) -->
+      <h1 id="heroHeadline" class="text-4xl sm:text-5xl md:text-[54px] font-extrabold tracking-tight text-white leading-[1.14] max-w-2xl">
+        Klov · kl5v
+        <span class="block mt-1">موقعي الشخصي</span>
+      </h1>
+
+      <!-- Subtitle Pill (Configured via HERO_CONTENT) -->
+      <p id="heroSubtitle" class="mt-4 inline-flex items-center px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-white/15 text-xs sm:text-sm text-zinc-300 tracking-wide shadow-[0_0_18px_-4px_rgba(255,255,255,0.14)]">
+        · سوشل ميديا · أدوات · روابط
+      </p>
+
+      <!-- =================================================================
+           EDIT HERE / عدّل هنا: صورة الأفاتار المربعة في منتصف الواجهة
+           (#heroAvatarImage)
+           - Clean square image with zero text or badges over it.
+           - Controlled strictly by the site owner via MAIN_SYS_PROFILE.avatarUrl
+             or src attribute (no public upload controls).
+           ================================================================= -->
+      <div class="mt-8 w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden border border-white/20 bg-zinc-950 shadow-[0_0_26px_-4px_rgba(255,255,255,0.18),0_18px_45px_rgba(0,0,0,0.88)]">
+        <img
+          id="heroAvatarImage"
+          src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cdefs%3E%3CradialGradient id='av' cx='50%25' cy='42%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%2327272a'/%3E%3Cstop offset='100%25' stop-color='%2309090b'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23av)'/%3E%3Ccircle cx='200' cy='155' r='62' fill='%2318181b' stroke='%23ffffff' stroke-opacity='0.24' stroke-width='2'/%3E%3Cpath d='M92 345c12-62 56-98 108-98s96 36 108 98' fill='%2318181b' stroke='%23ffffff' stroke-opacity='0.24' stroke-width='2'/%3E%3C/svg%3E"
+          alt="Klov Avatar"
+          class="w-full h-full object-cover block"
+          onerror="this.onerror=null;this.src='image/1.jpg';"
+        />
+      </div>
+
+      <!-- =================================================================
+           MAIN.SYS DOSSIER BOX (صندوق بيانات MAIN.SYS أسفل الأفاتار مباشرة)
+           Displays Name, Codename (kl5v), Class, and Location with dotted
+           leaders and soft diffuse white glow.
+           ================================================================= -->
+      <div
+        aria-label="MAIN Profile Dossier"
+        class="mainsys-box mt-6 w-full max-w-md sm:max-w-lg text-start"
+      >
+        <div class="mainsys-bg-layer" aria-hidden="true"></div>
+        <div class="mainsys-grain-layer" aria-hidden="true"></div>
+        <div class="mainsys-halo-layer" aria-hidden="true"></div>
+
+        <div class="relative z-10 px-4 pb-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="mainsys-tab">MAIN</span>
+            <span class="text-[11px] font-mono text-zinc-500">SYS // 01</span>
+          </div>
+
+          <div class="space-y-2.5" dir="ltr">
+            <!-- Name Row -->
+            <div class="mainsys-row">
+              <span id="sysLabelName" class="mainsys-label">Name</span>
+              <span class="mainsys-dots" aria-hidden="true"></span>
+              <span id="sysValueName" class="mainsys-value text-zinc-100">Fahad</span>
+            </div>
+
+            <!-- Codename Row -->
+            <div class="mainsys-row">
+              <span id="sysLabelCodename" class="mainsys-label">NickName</span>
+              <span class="mainsys-dots" aria-hidden="true"></span>
+              <span id="sysValueCodename" class="mainsys-value text-cyan-400 font-mono">Klov</span>
+            </div>
+
+            <!-- Class Row -->
+            <div class="mainsys-row">
+              <span id="sysLabelClass" class="mainsys-label">Class</span>
+              <span class="mainsys-dots" aria-hidden="true"></span>
+              <span id="sysValueClass" class="mainsys-value text-amber-300">Tools Developer &amp; Malware Analysis</span>
+            </div>
+
+            <!-- Location Row -->
+            <div class="mainsys-row">
+              <span id="sysLabelLocation" class="mainsys-label">Location</span>
+              <span class="mainsys-dots" aria-hidden="true"></span>
+              <span id="sysValueLocation" class="mainsys-value text-zinc-100">Earth, SA</span>
+            </div>
+
+            <div class="mainsys-row">
+              <span id="LanguageEn" class="mainsys-label">Language Programming</span>
+              <span class="mainsys-dots" aria-hidden="true"></span>
+              <span id="LanguageAr" class="mainsys-value text-amber-100">Assembly,Soon</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Scroll Prompt -->
+      <a id="scrollDownPrompt" href="#social-media" class="mt-9 inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition">
+        <span>انزل للأسفل · Scroll down</span>
+        <span aria-hidden="true">↓</span>
+      </a>
+    </header>
+
+    <!-- ===================================================================
+         READ-ONLY SECTION 1: SOCIAL MEDIA (حسابات السوشل ميديا)
+         EDIT HERE / عدّل هنا:
+         - Edit `SOCIAL_SIDE_IMAGE_URL` in the <script> block to set the
+           clean, text-free side image positioned on the LEFT of the cards.
+         - Edit `OWNER_SOCIAL_ITEMS` in the <script> block below.
+         =================================================================== -->
+    <section id="social-media" class="py-16 sm:py-20 border-t border-white/10">
+      <div class="text-center mb-8">
+        <span id="socialKicker" class="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 mb-2">
+          01 / تواصل
+        </span>
+        <h2 id="socialHeading" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          SOCIAL MEDIA
+        </h2>
+        <p id="socialDesc" class="mt-1.5 text-xs sm:text-sm text-zinc-50">
+         حساباتي ومنصاتي الاجتماعية
+        </p>
+      </div>
+
+      <!-- Physical LTR grid keeps the side image box on the LEFT of the cards in both AR & EN -->
+      <div dir="ltr" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+        <!-- Left Side Image Frame (Zero text overlays, owner-controlled via SOCIAL_SIDE_IMAGE_URL) -->
+        <div class="md:col-span-4 rounded-2xl overflow-hidden border border-white/15 bg-zinc-950/90 shadow-[0_0_22px_-4px_rgba(255,255,255,0.14),0_12px_30px_rgba(0,0,0,0.72)] aspect-square md:aspect-auto md:h-full">
+          <img
+            id="socialSideImage"
+            src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'%3E%3Cdefs%3E%3CradialGradient id='sg' cx='50%25' cy='40%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%2327272a'/%3E%3Cstop offset='100%25' stop-color='%2308080a'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='400' height='500' fill='url(%23sg)'/%3E%3Crect x='24' y='24' width='352' height='452' rx='18' fill='none' stroke='%23ffffff' stroke-opacity='0.14' stroke-width='1.5' stroke-dasharray='6 6'/%3E%3Ccircle cx='200' cy='210' r='54' fill='%23141418' stroke='%23ffffff' stroke-opacity='0.22' stroke-width='2'/%3E%3Cpath d='M110 385c12-56 48-88 90-88s78 32 90 88' fill='%23141418' stroke='%23ffffff' stroke-opacity='0.22' stroke-width='2'/%3E%3C/svg%3E"
+            alt="Social Section Visual"
+            class="w-full h-full object-cover block"
+            onerror="this.onerror=null;this.src='image/1.jpg';"
+          />
+        </div>
+
+        <!-- Right Side Social Cards Grid -->
+        <div id="socialMediaGrid" class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+      </div>
+    </section>
+
+    <!-- ===================================================================
+         READ-ONLY SECTION 2: TOOLS (بطاقات الأدوات والملفات للتحميل)
+         EDIT HERE / عدّل هنا:
+         Edit `OWNER_TOOLS_ITEMS` in the <script> block below.
+         Each tool renders its `imageUrl`, title, optional description, and
+         opens/downloads `downloadUrl` directly on click.
+         =================================================================== -->
+    <section id="tools" class="py-16 sm:py-20 border-t border-white/10">
+      <div class="text-center mb-8">
+        <span id="toolsKicker" class="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 mb-2">
+          02 / الأدوات والتحميلات
+        </span>
+        <h2 id="toolsHeading" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          TOOLS
+        </h2>
+        <p id="toolsDesc" class="mt-1.5 text-xs sm:text-sm text-zinc-100">
+          اضغط على صورة الأداة للانتقال مباشرة إلى رابط التحميل أو الملف
+        </p>
+      </div>
+
+      <div id="toolsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- ===================================================================
+         READ-ONLY SECTION 3: LINKS (الروابط المباشرة)
+         EDIT HERE / عدّل هنا:
+         Edit `OWNER_LINKS_ITEMS` in the <script> block below.
+         =================================================================== -->
+    <section id="links" class="py-16 sm:py-20 border-t border-white/10">
+      <div class="text-center mb-8">
+        <span id="linksKicker" class="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 mb-2">
+          03 / الروابط
+        </span>
+        <h2 id="linksHeading" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          LINKS
+        </h2>
+        <p id="linksDesc" class="mt-1.5 text-xs sm:text-sm text-zinc-100">
+         روابط اخرى
+        </p>
+      </div>
+
+      <div id="linksList" class="space-y-3"></div>
+    </section>
+
+    <!-- Minimal Footer -->
+    <footer class="py-10 border-t border-white/10 text-center text-xs text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span>© <span id="yearSpan"></span> <span id="footerBrandText">Klov</span></span>
+      <a id="backToTopLink" href="#top" class="text-zinc-400 hover:text-white transition">العودة للأعلى · Back to top ↑</a>
+    </footer>
+  </main>
+
+  <script>
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: إعدادات نقاط الثلج البيضاء المتحركة في الخلفية
+       - count: عدد النقاط البيضاء في الشاشة (مثال: 115).
+       - minSize / maxSize: أصغر وأكبر حجم للنقطة بالبكسل.
+       - fallSpeedMin / fallSpeedMax: سرعة تساقط النقاط للأسفل.
+       - driftAmount: مقدار التمايل الأفقي الناعم يمين ويسار.
+       - glowBlur: قوة الإضاءة/التوهج الأبيض الناعم حول النقاط.
+       ===================================================================== */
+    const SNOW_CONFIG = {
+      count: 115,
+      minSize: 1.0,
+      maxSize: 3.1,
+      fallSpeedMin: 0.28,
+      fallSpeedMax: 0.92,
+      driftAmount: 0.55,
+      driftSpeed: 0.015,
+      minOpacity: 0.22,
+      maxOpacity: 0.85,
+      glowBlur: 5
+    };
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: إعدادات حساب ديسكورد في قائمة الكليك يمين
+       ===================================================================== */
+    const DISCORD_CONFIG = {
+      handle: 'kl5v',
+      url: '' // اختياري: ضع رابط سيرفر أو ملف ديسكورد ليُفتح عند الضغط مع النسخ
+    };
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: النصوص الرئيسية في الواجهة العلوية
+       ===================================================================== */
+    const HERO_CONTENT = {
+      ar: {
+        titleHtml: 'Klov<span class="block mt-1">موقعي الشخصي</span>',
+        subtitle: '· سوشل ميديا · أدوات · روابط'
+      },
+      en: {
+        titleHtml: 'Welcome to<span class="block mt-1">Klov Space</span>',
+        subtitle: '· Social Media · Tools · Links'
+      }
+    };
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: صورة الأفاتار وبيانات صندوق MAIN.SYS
+       - avatarUrl: ضع رابط صورتك المباشر أو اسم ملف الصورة بجانب index.html
+         (مثال: "./avatar.png").
+       ===================================================================== */
+    const MAIN_SYS_PROFILE = {
+      avatarUrl: 'images/Klov.jpg',
+      nameAr: 'فهد',
+      nameEn: 'Fahad',
+      codename: 'Klov',
+      classAr: 'مبرمج ادوات & محلل برامج خبيثه',
+      classEn: 'Tools Developer & MalwareAnalaysing',
+      locationAr: 'الارض,االسعودية',
+      locationEn: 'Earth, SA',
+      LanguageAr: 'Assembly,Soon',
+      LanguageEn: 'Assembly,Soon',
+    };
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: صورة يسار قسم السوشل ميديا (SOCIAL_SIDE_IMAGE_URL)
+       - ضع رابط صورتك المباشر أو اسم الملف بجانب index.html (مثال: "./side.png")
+       - الصورة تظهر على يسار خيارات السوشل ميديا بدون أي كلام فوقها.
+       ===================================================================== */
+    const SOCIAL_SIDE_IMAGE_URL = 'images/1.jpg';
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: حسابات السوشل ميديا (OWNER_SOCIAL_ITEMS)
+       ===================================================================== */
+    const OWNER_SOCIAL_ITEMS = [
+      {
+        platform: 'Discord',
+        handle: 'Klov5',
+        url: 'https://discord.com/Klov5'
+      },
+      {
+        platform: 'X / Twitter',
+        handle: '@Klov501',
+        url: 'https://x.com'
+      },
+      {
+        platform: 'Group Almkaf7h',
+        handle: 'AX5eET88WM',
+        url: 'https://discord.gg/AX5eET88WM'
+      },
+      {
+        platform: 'GitHub',
+        handle: 'klov6',
+        url: 'https://github.com/klov6'
+      },
+      {
+        platform: 'LinkedIn',
+        handle: '@Klov-exe',
+        url: 'https://www.linkedin.com/in/klov-exe-466113449'
+      }
+    ];
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: الأدوات والملفات (OWNER_TOOLS_ITEMS)
+       كل أداة تعرض صورتها (`imageUrl`) وعنوانها ووصفها الاختياري، وعند
+       الضغط عليها تفتح أو تحمّل `downloadUrl` مباشرة.
+       ===================================================================== */
+    const OWNER_TOOLS_ITEMS = [
+      {
+        imageUrl: 'Images/2.png',
+        titleAr: 'Nuker Tool - تخريب السيرفرات',
+        titleEn: 'Quick Config Tool',
+        descAr: 'اسرع اداة تخريب سيرفرات ديسكورد- The fastest tool for sabotaging Discord servers',
+        descEn: 'Click the image to go straight to the download link',
+        downloadUrl: 'https://www.mediafire.com/file/p2t6kh83n1t1ow3/Kl-Nuker.exe/file'
+      },
+      {
+        imageUrl: 'images/3.png',
+        titleAr: ' Decrypt Tool-اداة فك تشفير',
+        titleEn: 'Files & Templates Pack',
+        descAr: ' Decrypt ConfuserEx - فك تشفير حمايه ConfuserEx القويه  ',
+        descEn: 'Ready files for direct download',
+        downloadUrl: 'https://www.mediafire.com/file/4ckpb3lh1tcilv7/Klov-NoFuserEx.rar/file'
+      },
+      {
+        imageUrl: 'https://placehold.co/800x460/101014/ffffff?text=UTILITY+03+%7C+ZIP',
+        titleAr: 'أداة مساعدة إضافية',
+        titleEn: 'Extra Utility',
+        descAr: '',
+        descEn: '',
+        downloadUrl: 'https://example.com/extra-utility'
+      },
+      {
+        imageUrl: 'https://placehold.co/800x460/16161c/ffffff?text=PRESETS+04+%7C+GET',
+        titleAr: 'مجموعة البريسيتات',
+        titleEn: 'Presets Collection',
+        descAr: 'رابط تحميل مباشر للأداة',
+        descEn: 'Direct download link for the tool',
+        downloadUrl: 'https://example.com/presets-download'
+      }
+    ];
+
+    /* =====================================================================
+       EDIT HERE / عدّل هنا: الروابط (OWNER_LINKS_ITEMS)
+       ===================================================================== */
+    const OWNER_LINKS_ITEMS = [
+      {
+        titleAr: 'TryHack Me',
+        titleEn: 'TryHack Me',
+        url: 'https://tryhackme.com/p/Klov1'
+      },
+      {
+        titleAr: 'Unkown',
+        titleEn: 'Unkown',
+        url: 'https://example.com/kl5v-hub'
+      },
+      {
+        titleAr: 'Unkown',
+        titleEn: 'Unkown',
+        url: 'https://github.com'
+      }
+    ];
+
+    /* =====================================================================
+       BILINGUAL LABELS (ARABIC / ENGLISH)
+       ===================================================================== */
+    const UI_I18N = {
+      ar: {
+        dir: 'rtl',
+        lang: 'ar',
+        ctxHeader: 'قائمة سريعة',
+        ctxLangLabel: 'تبديل اللغة (عربي / EN)',
+        ctxLangBadge: 'EN',
+        ctxDiscordLabel: `ديسكورد: ${DISCORD_CONFIG.handle}`,
+        ctxGoUpLabel: 'Go Up · للأعلى',
+        scrollDown: 'انزل للأسفل · Scroll down',
+        socialKicker: '01 / تواصل',
+        socialHeading: 'SOCIAL MEDIA',
+        socialDesc: 'حساباتي ومنصاتي الاجتماعية',
+        toolsKicker: '02 / الأدوات والتحميلات',
+        toolsHeading: 'TOOLS',
+        toolsDesc: 'اضغط على صورة الأداة للانتقال مباشرة إلى رابط التحميل أو الملف',
+        downloadCta: 'تحميل / فتح الملف ←',
+        linksKicker: '03 / الروابط',
+        linksHeading: 'LINKS',
+        linksDesc: 'روابط اخرى',
+        copyBtn: 'نسخ',
+        footerBrand: 'Klov · kl5v',
+        backToTop: 'العودة للأعلى · Back to top ↑',
+        toastLangSwitched: 'تم التبديل إلى العربية',
+        toastDiscordCopied: `تم نسخ حساب ديسكورد: ${DISCORD_CONFIG.handle}`,
+        toastCopied: 'تم نسخ الرابط',
+        toastCopyFail: 'تعذر النسخ'
+      },
+      en: {
+        dir: 'ltr',
+        lang: 'en',
+        ctxHeader: 'CONTEXT MENU',
+        ctxLangLabel: 'Switch Language (EN / عربي)',
+        ctxLangBadge: 'AR',
+        ctxDiscordLabel: `Discord: ${DISCORD_CONFIG.handle}`,
+        ctxGoUpLabel: 'Go Up',
+        scrollDown: 'Scroll down',
+        socialKicker: '01 / CONNECT',
+        socialHeading: 'SOCIAL MEDIA',
+        socialDesc: 'SOCIAL MEDIA Links',
+        toolsKicker: '02 / TOOLS & DOWNLOADS',
+        toolsHeading: 'TOOLS',
+        toolsDesc: 'Click any tool image to open its download or file link directly',
+        downloadCta: 'Download / Open File →',
+        linksKicker: '03 / LINKS',
+        linksHeading: 'LINKS',
+        linksDesc: 'Other Links',
+        copyBtn: 'Copy',
+        footerBrand: 'Klov · kl5v',
+        backToTop: 'Back to top ↑',
+        toastLangSwitched: 'Switched to English',
+        toastDiscordCopied: `Copied Discord account: ${DISCORD_CONFIG.handle}`,
+        toastCopied: 'Link copied',
+        toastCopyFail: 'Copy failed'
+      }
+    };
+
+    let currentLang = 'ar';
+    function t() {
+      return UI_I18N[currentLang] || UI_I18N.ar;
+    }
+
+    function normalizeUrl(rawUrl) {
+      const trimmed = (rawUrl || '').trim();
+      if (!trimmed) return '#';
+      if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('../')) {
+        return trimmed;
+      }
+      return 'https://' + trimmed;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderSocialMedia() {
+      const container = document.getElementById('socialMediaGrid');
+      if (!container) return;
+      const cardDir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+      container.innerHTML = OWNER_SOCIAL_ITEMS.map(item => {
+        const safeUrl = escapeHtml(normalizeUrl(item.url));
+        const safePlatform = escapeHtml(item.platform);
+        const safeHandle = escapeHtml(item.handle);
+
+        return `
+          <a
+            href="${safeUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            dir="${cardDir}"
+            class="glass-card rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3 group"
+          >
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-white truncate">${safePlatform}</div>
+              <div class="text-xs text-zinc-400 truncate mt-0.5">${safeHandle}</div>
+            </div>
+            <span class="text-xs text-zinc-400 group-hover:text-white transition shrink-0">↗</span>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderTools() {
+      const container = document.getElementById('toolsGrid');
+      if (!container) return;
+      const strings = t();
+
+      container.innerHTML = OWNER_TOOLS_ITEMS.map((item, idx) => {
+        const title = currentLang === 'ar'
+          ? (item.titleAr || item.titleEn || `أداة ${idx + 1}`)
+          : (item.titleEn || item.titleAr || `Tool ${idx + 1}`);
+        const desc = currentLang === 'ar'
+          ? (item.descAr || item.descEn || '')
+          : (item.descEn || item.descAr || '');
+
+        const safeTitle = escapeHtml(title);
+        const safeDesc = escapeHtml(desc);
+        const safeImage = escapeHtml(item.imageUrl || `https://placehold.co/800x460/121216/ffffff?text=TOOL+${idx + 1}`);
+        const safeFallback = escapeHtml(`https://placehold.co/800x460/121216/ffffff?text=TOOL+${idx + 1}`);
+        const safeDownloadUrl = escapeHtml(normalizeUrl(item.downloadUrl));
+
+        return `
+          <a
+            href="${safeDownloadUrl}"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="glass-card rounded-2xl overflow-hidden flex flex-col group block text-start"
+          >
+            <div class="w-full aspect-[16/9] bg-zinc-950 overflow-hidden border-b border-white/10">
+              <img
+                src="${safeImage}"
+                alt="${safeTitle}"
+                class="w-full h-full object-cover block group-hover:scale-[1.03] transition duration-300"
+                onerror="this.onerror=null;this.src='${safeFallback}';"
+              />
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between gap-2.5">
+              <div>
+                <div class="text-sm font-bold text-white group-hover:underline truncate">${safeTitle}</div>
+                ${safeDesc ? `<p class="text-xs text-zinc-400 mt-1 line-clamp-2">${safeDesc}</p>` : ''}
+              </div>
+              <div class="text-xs font-medium text-zinc-300 group-hover:text-white transition pt-1">
+                ${escapeHtml(strings.downloadCta)}
+              </div>
+            </div>
+          </a>
+        `;
+      }).join('');
+    }
+
+    function renderLinks() {
+      const container = document.getElementById('linksList');
+      if (!container) return;
+      const strings = t();
+
+      container.innerHTML = OWNER_LINKS_ITEMS.map((item, idx) => {
+        const normalized = normalizeUrl(item.url);
+        const label = currentLang === 'ar'
+          ? (item.titleAr || item.titleEn || `رابط ${idx + 1}`)
+          : (item.titleEn || item.titleAr || `Link ${idx + 1}`);
+
+        const safeUrl = escapeHtml(normalized);
+        const safeTitle = escapeHtml(label);
+
+        return `
+          <div class="glass-card rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3">
+            <a
+              href="${safeUrl}"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="min-w-0 flex-1 group"
+            >
+              <div class="text-sm font-semibold text-white group-hover:underline truncate">${safeTitle}</div>
+              <div class="text-xs text-zinc-400 truncate mt-0.5">${safeUrl}</div>
+            </a>
+            <button
+              type="button"
+              onclick="copyToClipboard('${safeUrl}')"
+              class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-white hover:text-black border border-white/15 text-xs text-zinc-200 cursor-pointer transition shrink-0"
+            >
+              ${escapeHtml(strings.copyBtn)}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang === 'en' ? 'en' : 'ar';
+      const strings = t();
+      const hero = HERO_CONTENT[currentLang] || HERO_CONTENT.ar;
+
+      document.documentElement.lang = strings.lang;
+      document.documentElement.dir = strings.dir;
+
+      const setText = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+
+      const heroHeadline = document.getElementById('heroHeadline');
+      if (heroHeadline) heroHeadline.innerHTML = hero.titleHtml;
+
+      setText('heroSubtitle', hero.subtitle);
+
+      const scrollPrompt = document.getElementById('scrollDownPrompt');
+      if (scrollPrompt) {
+        scrollPrompt.innerHTML = `<span>${escapeHtml(strings.scrollDown)}</span><span aria-hidden="true">↓</span>`;
+      }
+
+      setText('socialKicker', strings.socialKicker);
+      setText('socialHeading', strings.socialHeading);
+      setText('socialDesc', strings.socialDesc);
+
+      setText('toolsKicker', strings.toolsKicker);
+      setText('toolsHeading', strings.toolsHeading);
+      setText('toolsDesc', strings.toolsDesc);
+
+      setText('linksKicker', strings.linksKicker);
+      setText('linksHeading', strings.linksHeading);
+      setText('linksDesc', strings.linksDesc);
+
+      setText('footerBrandText', strings.footerBrand);
+      setText('backToTopLink', strings.backToTop);
+
+      setText('sysValueName', currentLang === 'ar' ? (MAIN_SYS_PROFILE.nameAr || MAIN_SYS_PROFILE.nameEn) : (MAIN_SYS_PROFILE.nameEn || MAIN_SYS_PROFILE.nameAr));
+      setText('sysValueCodename', MAIN_SYS_PROFILE.codename || 'Klov');
+      setText('sysValueClass', currentLang === 'ar' ? (MAIN_SYS_PROFILE.classAr || MAIN_SYS_PROFILE.classEn) : (MAIN_SYS_PROFILE.classEn || MAIN_SYS_PROFILE.classAr));
+      setText('sysValueLocation', currentLang === 'ar' ? (MAIN_SYS_PROFILE.locationAr || MAIN_SYS_PROFILE.locationEn) : (MAIN_SYS_PROFILE.locationEn || MAIN_SYS_PROFILE.locationAr));
+
+      setText('ctxMenuHeader', strings.ctxHeader);
+      setText('ctxLangLabel', strings.ctxLangLabel);
+      setText('ctxLangBadge', strings.ctxLangBadge);
+      setText('ctxDiscordText', strings.ctxDiscordLabel);
+      setText('ctxGoUpLabel', strings.ctxGoUpLabel);
+
+      renderSocialMedia();
+      renderTools();
+      renderLinks();
+    }
+
+    function toggleLanguage() {
+      const nextLang = currentLang === 'ar' ? 'en' : 'ar';
+      applyLanguage(nextLang);
+      hideContextMenu();
+      showToast(t().toastLangSwitched);
+    }
+
+    function handleDiscordContextAction() {
+      copyToClipboard(DISCORD_CONFIG.handle, t().toastDiscordCopied);
+      if (DISCORD_CONFIG.url && DISCORD_CONFIG.url.trim()) {
+        window.open(normalizeUrl(DISCORD_CONFIG.url), '_blank', 'noopener,noreferrer');
+      }
+      hideContextMenu();
+    }
+
+    function scrollToTopFromMenu() {
+      hideContextMenu();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function hideContextMenu() {
+      const menu = document.getElementById('customContextMenu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    function setupContextMenu() {
+      const menu = document.getElementById('customContextMenu');
+      if (!menu) return;
+
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        menu.classList.remove('hidden');
+
+        const menuRect = menu.getBoundingClientRect();
+        const pad = 10;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let x = e.clientX;
+        let y = e.clientY;
+
+        if (x + menuRect.width > vw - pad) {
+          x = vw - menuRect.width - pad;
+        }
+        if (x < pad) x = pad;
+
+        if (y + menuRect.height > vh - pad) {
+          y = vh - menuRect.height - pad;
+        }
+        if (y < pad) y = pad;
+
+        menu.style.left = `${Math.round(x)}px`;
+        menu.style.top = `${Math.round(y)}px`;
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!menu.contains(e.target)) {
+          hideContextMenu();
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'F1') {
+          e.preventDefault();
+          toggleLanguage();
+          return;
+        }
+        if (e.key === 'Escape') {
+          hideContextMenu();
+        }
+      });
+
+      window.addEventListener('scroll', hideContextMenu, { passive: true });
+      window.addEventListener('resize', hideContextMenu);
+    }
+
+    function copyToClipboard(text, customSuccessMessage) {
+      const helper = document.createElement('textarea');
+      helper.value = text;
+      document.body.appendChild(helper);
+      helper.select();
+      try {
+        document.execCommand('copy');
+        showToast(customSuccessMessage || t().toastCopied);
+      } catch (err) {
+        showToast(t().toastCopyFail);
+      }
+      document.body.removeChild(helper);
+    }
+
+    let toastTimeout;
+    function showToast(message) {
+      const banner = document.getElementById('toastBanner');
+      const label = document.getElementById('toastText');
+      if (!banner || !label) return;
+
+      label.textContent = message;
+      banner.classList.remove('hidden');
+      banner.classList.add('flex');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+        banner.classList.remove('flex');
+      }, 2200);
+    }
+
+    /* =====================================================================
+       SNOW-DOT PARTICLE ENGINE (#snowCanvas)
+       Gentle downward fall, slight horizontal drift, varying small dot
+       sizes, and soft white glow over the deep black background.
+       ===================================================================== */
+    function initSnowCanvas() {
+      const canvas = document.getElementById('snowCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let width = 0;
+      let height = 0;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      let dots = [];
+
+      function rand(min, max) {
+        return min + Math.random() * (max - min);
+      }
+
+      function makeDot(randomY = true) {
+        const minR = Math.max(0.5, Number(SNOW_CONFIG.minSize) || 1);
+        const maxR = Math.max(minR + 0.2, Number(SNOW_CONFIG.maxSize) || 3);
+        const r = rand(minR, maxR);
+        const depth = (r - minR) / (maxR - minR);
+        const minV = Math.max(0.05, Number(SNOW_CONFIG.fallSpeedMin) || 0.25);
+        const maxV = Math.max(minV + 0.05, Number(SNOW_CONFIG.fallSpeedMax) || 0.85);
+
+        return {
+          x: rand(0, Math.max(width, 1)),
+          y: randomY ? rand(0, Math.max(height, 1)) : rand(-20, -2),
+          r,
+          vy: rand(minV, maxV) * (0.72 + depth * 0.6),
+          phase: rand(0, Math.PI * 2),
+          driftFreq: (Number(SNOW_CONFIG.driftSpeed) || 0.015) * rand(0.7, 1.35),
+          driftAmp: (Number(SNOW_CONFIG.driftAmount) || 0.55) * (0.45 + depth * 0.75),
+          alpha: rand(Number(SNOW_CONFIG.minOpacity) || 0.2, Number(SNOW_CONFIG.maxOpacity) || 0.85)
+        };
+      }
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.max(1, Math.floor(width * dpr));
+        canvas.height = Math.max(1, Math.floor(height * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function buildDots() {
+        const scale = Math.min(1.4, Math.max(0.55, (width * height) / (1280 * 800)));
+        const total = Math.max(25, Math.round((Number(SNOW_CONFIG.count) || 115) * scale));
+        dots = Array.from({ length: total }, () => makeDot(true));
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, width, height);
+
+        const blur = Math.max(0, Number(SNOW_CONFIG.glowBlur) || 0);
+        if (blur > 0) {
+          ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+          ctx.shadowBlur = blur;
+        } else {
+          ctx.shadowBlur = 0;
+        }
+
+        for (let i = 0; i < dots.length; i++) {
+          const d = dots[i];
+
+          if (!reducedMotion) {
+            d.phase += d.driftFreq;
+            d.y += d.vy;
+            d.x += Math.sin(d.phase) * d.driftAmp;
+
+            if (d.y - d.r > height + 10) {
+              dots[i] = makeDot(false);
+              dots[i].x = rand(0, Math.max(width, 1));
+              continue;
+            }
+            if (d.x < -12) d.x = width + 12;
+            if (d.x > width + 12) d.x = -12;
+          }
+
+          ctx.beginPath();
+          ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${d.alpha.toFixed(3)})`;
+          ctx.fill();
+        }
+
+        requestAnimationFrame(render);
+      }
+
+      resize();
+      buildDots();
+      requestAnimationFrame(render);
+
+      window.addEventListener('resize', () => {
+        resize();
+        buildDots();
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const yearEl = document.getElementById('yearSpan');
+      if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
+      }
+
+      const avatarEl = document.getElementById('heroAvatarImage');
+      if (avatarEl && MAIN_SYS_PROFILE.avatarUrl && MAIN_SYS_PROFILE.avatarUrl.trim()) {
+        avatarEl.src = MAIN_SYS_PROFILE.avatarUrl.trim();
+      }
+
+      const socialSideEl = document.getElementById('socialSideImage');
+      if (socialSideEl && SOCIAL_SIDE_IMAGE_URL && SOCIAL_SIDE_IMAGE_URL.trim()) {
+        socialSideEl.src = SOCIAL_SIDE_IMAGE_URL.trim();
+      }
+
+      applyLanguage(currentLang);
+      setupContextMenu();
+      initSnowCanvas();
+    });
+  </script>
+</body>
+</html>
