@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Klov (kl5v) — Personal Portfolio</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --surface-bg: rgba(13, 13, 16, 0.84);
+      --surface-hover: rgba(133, 155, 197, 0.94);
+      --border-subtle: rgba(255, 255, 255, 0.15);
+      --border-strong: rgba(255, 255, 255, 0.4);
+      --text-primary: #ffffff;
+      --text-muted: #a1a1aa;
+      --box-white-glow: 0 0 22px -4px rgba(255, 255, 255, 0.14), 0 12px 30px rgba(0, 0, 0, 0.72);
+      --box-white-glow-hover: 0 0 30px -2px rgba(255, 255, 255, 0.24), 0 16px 38px rgba(0, 0, 0, 0.84);
+      --mainsys-glow-color: rgba(255, 255, 255, 0.32);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100vw;
+      background-color: #000000;
+      color: var(--text-primary);
+      font-family: 'IBM Plex Sans Arabic', 'Inter', sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* 1. حاوية الصور العشوائية في الخلفية (الطبقة الأولى - تحت التعتيم والتشويش) */
+    .full-page-bg-collage {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background-color: #050507;
+    }
+
+    .collage-tile {
+      position: absolute;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.85);
+      filter: grayscale(100%) contrast(145%) brightness(0.42);
+      user-select: none;
+    }
+
+    /* 2. الثلج (الطبقة الثانية) */
+    #snowCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      display: block;
+      opacity: 0.55;
+    }
+
+    /* 3. التعتيم والتشويش فوق الصور العشوائية (الطبقة الثالثة) */
+    .full-page-grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        /* تعتيم شامل فوق الصور */
+        radial-gradient(circle at 50% 45%, rgba(0, 0, 0, 0.58) 0%, rgba(0, 0, 0, 0.84) 100%),
+        /* خطوط CRT */
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.55) 2px,
+          rgba(0, 0, 0, 0.55) 4px
+        ),
+        /* نويز / تشويش */
+        repeating-radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 3px);
+      background-size: 100% 100%, 100% 4px, 3px 3px;
+    }
+
+    /* 4. محتوى الموقع (الطبقة العليا) */
+    main {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    .glass-card {
+      background: var(--surface-bg);
+      border: 1px solid var(--border-subtle);
+      box-shadow: var(--box-white-glow);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: all 0.22s ease;
+    }
+
+    .glass-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+      box-shadow: var(--box-white-glow-hover);
+    }
+
+    .mainsys-box {
+      position: relative;
+      background-color: rgba(10, 10, 14, 0.88);
+      border-radius: 18px;
+      box-shadow: 0 0 28px -2px rgba(255, 255, 255, 0.20), 0 0 64px 4px rgba(255, 255, 255, 0.09), 0 20px 52px rgba(0, 0, 0, 0.88);
+      overflow: hidden;
+    }
+
+    .mainsys-box::before,
+    .mainsys-box::after {
+      content: "";
+      position: absolute;
+      left: 7%;
+      right: 7%;
+      height: 10px;
+      pointer-events: none;
+      z-index: 3;
+      filter: blur(6px);
+      background: radial-gradient(ellipse at center, var(--mainsys-glow-color) 0%, rgba(255, 255, 255, 0.12) 55%, transparent 100%);
+    }
+    .mainsys-box::before { top: -3px; }
+    .mainsys-box::after { bottom: -3px; }
+
+    .mainsys-halo-layer {
+      position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: inherit;
+      box-shadow: inset 0 1px 10px rgba(255, 255, 255, 0.20), inset 0 -1px 10px rgba(255, 255, 255, 0.16);
+    }
+
+    .mainsys-grain-layer {
+      position: absolute; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(180deg, rgba(6, 6, 9, 0.72) 0%, rgba(6, 6, 9, 0.84) 100%);
+    }
+
+    .mainsys-tab {
+      display: inline-block; background-color: rgba(255, 255, 255, 0.06); color: #e2dbdb;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.16); border-left: 1px solid rgba(255, 255, 255, 0.12); border-right: 1px solid rgba(255, 255, 255, 0.12);
+      border-bottom-left-radius: 10px; border-bottom-right-radius: 10px;
+      font-family: ui-monospace, monospace; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; padding: 3px 11px 4px; text-transform: uppercase;
+    }
+
+    .mainsys-row { display: flex; align-items: baseline; gap: 8px; font-family: ui-monospace, monospace; font-size: 0.84rem; line-height: 1.5; }
+    @media (min-width: 640px) {
+      .mainsys-row { gap: 10px; font-size: 0.92rem; }
+    }
+    .mainsys-label { color: #a1a1aa; flex-shrink: 0; font-weight: 500; }
+    .mainsys-dots { flex: 1 1 auto; min-width: 12px; border-bottom: 1.5px dotted rgba(255, 255, 255, 0.42); transform: translateY(-4px); }
+    .mainsys-value { flex-shrink: 1; min-width: 0; word-break: break-word; font-weight: 700; text-align: end; }
+
+    ::-webkit-scrollbar { width: 7px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+  </style>
+</head>
+<body class="antialiased selection:bg-white selection:text-black">
+  
+  <!-- طبقة 1: الصور الكثيرة العشوائية في الخلفية -->
+  <div id="bgCollageContainer" class="full-page-bg-collage" aria-hidden="true"></div>
+  <!-- طبقة 2: الثلج -->
+  <canvas id="snowCanvas" aria-hidden="true"></canvas>
+  <!-- طبقة 3: التعتيم والتشويش فوق الصور -->
+  <div class="full-page-grain" aria-hidden="true"></div>
+
+  <!-- Toast -->
+  <div id="toastBanner" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-[100] hidden items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/95 border border-white/25 text-white text-xs font-medium shadow-2xl">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toastText">Done</span>
+  </div>
+
+  <!-- Context Menu -->
+  <div id="customContextMenu" class="fixed z-[100] hidden min-w-[225px] rounded-2xl bg-zinc-950/95 border border-white/20 shadow-2xl backdrop-blur-md p-1.5 text-xs text-white">
+    <div class="px-3 py-1.5 text-[10px] uppercase text-zinc-500 border-b border-white/10 mb-1 flex justify-between">
+      <span id="ctxMenuHeader">قائمة سريعة</span>
+      <span>F1 / RMB</span>
+    </div>
+    <button id="ctxLangBtn" type="button" onclick="toggleLanguage()" class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white hover:text-black transition text-start">
+      <span id="ctxLangLabel" class="font-medium">تبديل اللغة (عربي / EN)</span>
+      <span id="ctxLangBadge" class="px-1.5 py-0.5 rounded bg-white/10 text-[10px]">EN</span>
+    </button>
+    <button id="ctxDiscordBtn" type="button" onclick="handleDiscordContextAction()" class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white hover:text-black transition text-start mt-0.5">
+      <span class="flex items-center gap-2"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+        <span id="ctxDiscordText" class="font-medium truncate">ديسكورد: kl5v</span></span>
+    </button>
+    <div class="my-1 border-t border-white/10"></div>
+    <button id="ctxGoUpBtn" type="button" onclick="scrollToTopFromMenu()" class="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-xl hover:bg-white hover:text-black transition text-start">
+      <span id="ctxGoUpLabel" class="font-medium">Go Up · للأعلى</span><span>↑</span>
+    </button>
+  </div>
+
+  <!-- المحتوى الأساسي -->
+  <main class="max-w-4xl mx-auto px-4 sm:px-6">
+    <header id="top" class="min-h-[92vh] flex flex-col items-center justify-center text-center py-10 sm:py-20">
+      <nav aria-label="Quick Header Icons" class="flex items-center justify-center gap-3.5 mb-6">
+        <a href="#social-media" class="w-10 h-10 rounded-full border border-white/20 bg-zinc-900/85 hover:bg-white hover:text-black text-white shadow-lg flex items-center justify-center transition"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></a>
+        <a href="#tools" class="w-10 h-10 rounded-full border border-white/20 bg-zinc-900/85 hover:bg-white hover:text-black text-white shadow-lg flex items-center justify-center transition"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></a>
+        <a href="#links" class="w-10 h-10 rounded-full border border-white/20 bg-zinc-900/85 hover:bg-white hover:text-black text-white shadow-lg flex items-center justify-center transition"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></a>
+      </nav>
+
+      <h1 id="heroHeadline" class="text-3xl sm:text-5xl md:text-[54px] font-extrabold tracking-tight text-white leading-[1.16] max-w-2xl drop-shadow-2xl">
+        Klov · kl5v <span class="block mt-1">موقعي الشخصي</span>
+      </h1>
+
+      <p id="heroSubtitle" class="mt-4 inline-flex items-center px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-white/15 text-xs sm:text-sm text-zinc-300 tracking-wide shadow-lg">· سوشل ميديا · أدوات · روابط</p>
+
+      <div class="mt-7 w-32 h-32 sm:w-44 sm:h-44 rounded-2xl overflow-hidden border border-white/20 bg-zinc-950 shadow-2xl">
+        <img id="heroAvatarImage" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cdefs%3E%3CradialGradient id='av' cx='50%25' cy='42%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%2327272a'/%3E%3Cstop offset='100%25' stop-color='%2309090b'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='400' height='400' fill='url(%23av)'/%3E%3Ccircle cx='200' cy='155' r='62' fill='%2318181b' stroke='%23ffffff' stroke-opacity='0.24' stroke-width='2'/%3E%3Cpath d='M92 345c12-62 56-98 108-98s96 36 108 98' fill='%2318181b' stroke='%23ffffff' stroke-opacity='0.24' stroke-width='2'/%3E%3C/svg%3E" alt="Klov Avatar" class="w-full h-full object-cover block" onerror="this.onerror=null;this.src='image/1.jpg';" />
+      </div>
+
+      <!-- MAIN.SYS -->
+      <div class="mainsys-box mt-6 w-full max-w-md sm:max-w-lg text-start">
+        <div class="mainsys-halo-layer" aria-hidden="true"></div>
+        <div class="mainsys-grain-layer" aria-hidden="true"></div>
+        <div class="relative z-10 px-4 pb-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="mainsys-tab">MAIN</span>
+            <span class="text-[11px] font-mono text-zinc-500">SYS // 01</span>
+          </div>
+          <div class="space-y-2.5" dir="ltr">
+            <div class="mainsys-row"><span class="mainsys-label">Name</span><span class="mainsys-dots"></span><span id="sysValueName" class="mainsys-value text-zinc-100">Fahad</span></div>
+            <div class="mainsys-row"><span class="mainsys-label">NickName</span><span class="mainsys-dots"></span><span id="sysValueCodename" class="mainsys-value text-cyan-400 font-mono">Klov</span></div>
+            <div class="mainsys-row"><span class="mainsys-label">Class</span><span class="mainsys-dots"></span><span id="sysValueClass" class="mainsys-value text-amber-300">Tools Developer</span></div>
+            <div class="mainsys-row"><span class="mainsys-label">Location</span><span class="mainsys-dots"></span><span id="sysValueLocation" class="mainsys-value text-zinc-100">Earth, SA</span></div>
+            <div class="mainsys-row"><span class="mainsys-label">Language</span><span class="mainsys-dots"></span><span id="LanguageAr" class="mainsys-value text-amber-100">Assembly, Soon</span></div>
+          </div>
+        </div>
+      </div>
+      
+      <a id="scrollDownPrompt" href="#social-media" class="mt-8 inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition"><span>انزل للأسفل · Scroll down</span><span aria-hidden="true">↓</span></a>
+    </header>
+
+    <!-- SOCIAL MEDIA -->
+    <section id="social-media" class="py-14 sm:py-20 border-t border-white/10">
+      <div class="text-center mb-8">
+        <span id="socialKicker" class="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 mb-2">01 / تواصل</span>
+        <h2 id="socialHeading" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">SOCIAL MEDIA</h2>
+        <p id="socialDesc" class="mt-1.5 text-xs sm:text-sm text-zinc-50">حساباتي ومنصاتي الاجتماعية</p>
+      </div>
+      <div dir="ltr" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+        <div class="md:col-span-4 rounded-2xl overflow-hidden border border-white/15 bg-zinc-950/90 shadow-2xl aspect-square md:aspect-auto md:h-full">
+          <img id="socialSideImage" src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'%3E%3Cdefs%3E%3CradialGradient id='sg' cx='50%25' cy='40%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%2327272a'/%3E%3Cstop offset='100%25' stop-color='%2308080a'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='400' height='500' fill='url(%23sg)'/%3E%3Crect x='24' y='24' width='352' height='452' rx='18' fill='none' stroke='%23ffffff' stroke-opacity='0.14' stroke-width='1.5' stroke-dasharray='6 6'/%3E%3Ccircle cx='200' cy='210' r='54' fill='%23141418' stroke='%23ffffff' stroke-opacity='0.22' stroke-width='2'/%3E%3Cpath d='M110 385c12-56 48-88 90-88s78 32 90 88' fill='%23141418' stroke='%23ffffff' stroke-opacity='0.22' stroke-width='2'/%3E%3C/svg%3E" alt="Social Section Visual" class="w-full h-full object-cover block" onerror="this.onerror=null;this.src='image/1.jpg';" />
+        </div>
+        <div id="socialMediaGrid" class="md:col-span-8 grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+      </div>
+    </section>
+
+    <!-- TOOLS -->
+    <section id="tools" class="py-14 sm:py-20 border-t border-white/10">
+      <div class="text-center mb-8">
+        <span id="toolsKicker" class="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 mb-2">02 / الأدوات والتحميلات</span>
+        <h2 id="toolsHeading" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">TOOLS</h2>
+        <p id="toolsDesc" class="mt-1.5 text-xs sm:text-sm text-zinc-100">اضغط على صورة الأداة للانتقال مباشرة إلى رابط التحميل أو الملف</p>
+      </div>
+      <div id="toolsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+    </section>
+
+    <!-- LINKS -->
+    <section id="links" class="py-14 sm:py-20 border-t border-white/10">
+      <div class="text-center mb-8">
+        <span id="linksKicker" class="inline-block text-[11px] font-semibold uppercase tracking-[0.22em] text-zinc-400 mb-2">03 / الروابط</span>
+        <h2 id="linksHeading" class="text-2xl sm:text-3xl font-bold tracking-tight text-white">LINKS</h2>
+        <p id="linksDesc" class="mt-1.5 text-xs sm:text-sm text-zinc-100">روابط اخرى</p>
+      </div>
+      <div id="linksList" class="space-y-3"></div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 border-t border-white/10 text-center text-xs text-zinc-500 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span>© <span id="yearSpan"></span> <span id="footerBrandText">Klov</span></span>
+      <a id="backToTopLink" href="#top" class="text-zinc-400 hover:text-white transition">العودة للأعلى · Back to top ↑</a>
+    </footer>
+  </main>
+
+  <script>
+    /* 🖼️ قائمة الصور العشوائية في الخلفية - أضف أو عدّل المسارات هنا براحتك */
+    const BG_COLLAGE_IMAGES = [
+      'im1/0.jpg',
+      'im1/15.jpg',
+      'im1/11.jpg',
+      'im1/8.jpg',
+      'im1/2.jpg',
+      'im1/1.jpg',
+      'im1/14.jpg',
+      'im1/15.png'
+      // تقدر تضيف صور زيادة هنا مثلاً: 'im1/16.jpg'
+    ];
+
+    const COLLAGE_CONFIG = {
+      tileCount: 38,     // عدد الصور المبعثرة في الديسكتوب
+      mobileTileCount: 22, // عدد الصور في الجوال عشان يكون خفيف ومرتب
+      minSize: 130,      // أصغر عرض للصورة في الديسكتوب (px)
+      maxSize: 270,      // أكبر عرض للصورة في الديسكتوب (px)
+      mobileMinSize: 95, // أصغر عرض للصورة في الجوال (px)
+      mobileMaxSize: 170,// أكبر عرض للصورة في الجوال (px)
+      maxRotate: 9       // أقصى زاوية ميلان عشوائية بالدرجات
+    };
+
+    const SNOW_CONFIG = { count: 115, minSize: 1.0, maxSize: 3.1, fallSpeedMin: 0.28, fallSpeedMax: 0.92, driftAmount: 0.55, driftSpeed: 0.015, minOpacity: 0.22, maxOpacity: 0.85, glowBlur: 5 };
+    const DISCORD_CONFIG = { handle: 'kl5v', url: '' };
+    const HERO_CONTENT = {
+      ar: { titleHtml: 'Klov<span class="block mt-1">موقعي الشخصي</span>', subtitle: '· سوشل ميديا · أدوات · روابط' },
+      en: { titleHtml: 'Welcome to<span class="block mt-1">Klov Space</span>', subtitle: '· Social Media · Tools · Links' }
+    };
+    
+    const MAIN_SYS_PROFILE = {
+      avatarUrl: 'images/Klov.jpg', 
+      nameAr: 'فهد', nameEn: 'Fahad', codename: 'Klov',
+      classAr: 'مبرمج ادوات & محلل برامج خبيثه', classEn: 'Tools Developer & MalwareAnalaysing',
+      locationAr: 'الارض,االسعودية', locationEn: 'Earth, SA',
+      LanguageAr: 'Assembly,Soon', LanguageEn: 'Assembly,Soon',
+    };
+    
+    const SOCIAL_SIDE_IMAGE_URL = 'images/1.jpg'; 
+    
+    const OWNER_SOCIAL_ITEMS = [
+      { platform: 'Discord', handle: 'Klov5', url: 'https://discord.com/Klov5' },
+      { platform: 'X / Twitter', handle: '@Klov501', url: 'https://x.com' },
+      { platform: 'Group Almkaf7h', handle: 'AX5eET88WM', url: 'https://discord.gg/AX5eET88WM' },
+      { platform: 'GitHub', handle: 'klov6', url: 'https://github.com/klov6' },
+      { platform: 'LinkedIn', handle: '@Klov-exe', url: 'https://www.linkedin.com/in/klov-exe-466113449' }
+    ];
+    
+    const OWNER_TOOLS_ITEMS = [
+      { imageUrl: 'images/2.png', titleAr: 'Nuker Tool - تخريب السيرفرات', titleEn: 'Quick Config Tool', descAr: 'اسرع اداة تخريب سيرفرات ديسكورد- The fastest tool for sabotaging Discord servers', descEn: 'Click the image to go straight to the download link', downloadUrl: 'https://www.mediafire.com/file/p2t6kh83n1t1ow3/Kl-Nuker.exe/file' },
+      { imageUrl: 'images/3.png', titleAr: ' Decrypt Tool-اداة فك تشفير', titleEn: 'Files & Templates Pack', descAr: ' Decrypt ConfuserEx - فك تشفير حمايه ConfuserEx القويه  ', descEn: 'Ready files for direct download', downloadUrl: 'https://www.mediafire.com/file/4ckpb3lh1tcilv7/Klov-NoFuserEx.rar/file' },
+      { imageUrl: '', titleAr: 'Soon', titleEn: 'Extra Utility', descAr: '', descEn: '', downloadUrl: 'https://example.com/extra-utility' },
+      { imageUrl: '', titleAr: 'Soon', titleEn: 'Presets Collection', descAr: 'رابط تحميل مباشر للأداة', descEn: 'Direct download link for the tool', downloadUrl: 'https://example.com/presets-download' }
+    ];
+    
+    const OWNER_LINKS_ITEMS = [
+      { titleAr: 'TryHack Me', titleEn: 'TryHack Me', url: 'https://tryhackme.com/p/Klov1' },
+      { titleAr: 'Unkown', titleEn: 'Unkown', url: 'https://example.com/kl5v-hub' },
+      { titleAr: 'Unkown', titleEn: 'Unkown', url: 'https://github.com' }
+    ];
+
+    const UI_I18N = {
+      ar: { dir: 'rtl', lang: 'ar', ctxHeader: 'قائمة سريعة', ctxLangLabel: 'تبديل اللغة (عربي / EN)', ctxLangBadge: 'EN', ctxDiscordLabel: `ديسكورد: ${DISCORD_CONFIG.handle}`, ctxGoUpLabel: 'Go Up · للأعلى', scrollDown: 'انزل للأسفل · Scroll down', socialKicker: '01 / تواصل', socialHeading: 'SOCIAL MEDIA', socialDesc: 'حساباتي ومنصاتي الاجتماعية', toolsKicker: '02 / الأدوات والتحميلات', toolsHeading: 'TOOLS', toolsDesc: 'اضغط على صورة الأداة للانتقال مباشرة إلى رابط التحميل أو الملف', downloadCta: 'تحميل / فتح الملف ←', linksKicker: '03 / الروابط', linksHeading: 'LINKS', linksDesc: 'روابط اخرى', copyBtn: 'نسخ', footerBrand: 'Klov · kl5v', backToTop: 'العودة للأعلى · Back to top ↑', toastLangSwitched: 'تم التبديل إلى العربية', toastDiscordCopied: `تم نسخ حساب ديسكورد: ${DISCORD_CONFIG.handle}`, toastCopied: 'تم نسخ الرابط', toastCopyFail: 'تعذر النسخ' },
+      en: { dir: 'ltr', lang: 'en', ctxHeader: 'CONTEXT MENU', ctxLangLabel: 'Switch Language (EN / عربي)', ctxLangBadge: 'AR', ctxDiscordLabel: `Discord: ${DISCORD_CONFIG.handle}`, ctxGoUpLabel: 'Go Up', scrollDown: 'Scroll down', socialKicker: '01 / CONNECT', socialHeading: 'SOCIAL MEDIA', socialDesc: 'SOCIAL MEDIA Links', toolsKicker: '02 / TOOLS & DOWNLOADS', toolsHeading: 'TOOLS', toolsDesc: 'Click any tool image to open its download or file link directly', downloadCta: 'Download / Open File →', linksKicker: '03 / LINKS', linksHeading: 'LINKS', linksDesc: 'Other Links', copyBtn: 'Copy', footerBrand: 'Klov · kl5v', backToTop: 'Back to top ↑', toastLangSwitched: 'Switched to English', toastDiscordCopied: `Copied Discord account: ${DISCORD_CONFIG.handle}`, toastCopied: 'Link copied', toastCopyFail: 'Copy failed' }
+    };
+
+    let currentLang = 'ar';
+    function t() { return UI_I18N[currentLang] || UI_I18N.ar; }
+
+    function initBgCollage() {
+      const container = document.getElementById('bgCollageContainer');
+      if (!container || !BG_COLLAGE_IMAGES.length) return;
+      container.innerHTML = '';
+
+      const isMobile = window.innerWidth < 640;
+      const count = isMobile ? COLLAGE_CONFIG.mobileTileCount : COLLAGE_CONFIG.tileCount;
+      const minW = isMobile ? COLLAGE_CONFIG.mobileMinSize : COLLAGE_CONFIG.minSize;
+      const maxW = isMobile ? COLLAGE_CONFIG.mobileMaxSize : COLLAGE_CONFIG.maxSize;
+
+      const cols = Math.ceil(Math.sqrt(count * (window.innerWidth / Math.max(window.innerHeight, 1))));
+      const rows = Math.ceil(count / cols);
+
+      for (let i = 0; i < count; i++) {
+        const img = document.createElement('img');
+        const src = BG_COLLAGE_IMAGES[Math.floor(Math.random() * BG_COLLAGE_IMAGES.length)];
+        const width = minW + Math.random() * (maxW - minW);
+        const height = width * (0.75 + Math.random() * 0.55);
+
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const cellW = 100 / cols;
+        const cellH = 100 / rows;
+        const leftPct = (col * cellW) + (Math.random() * cellW * 0.85) - (cellW * 0.25);
+        const topPct = (row * cellH) + (Math.random() * cellH * 0.85) - (cellH * 0.25);
+        const rotate = (Math.random() * 2 - 1) * COLLAGE_CONFIG.maxRotate;
+        const opacity = (0.35 + Math.random() * 0.45).toFixed(2);
+
+        img.src = src;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.className = 'collage-tile';
+        img.style.width = `${Math.round(width)}px`;
+        img.style.height = `${Math.round(height)}px`;
+        img.style.left = `${leftPct.toFixed(2)}%`;
+        img.style.top = `${topPct.toFixed(2)}%`;
+        img.style.opacity = opacity;
+        img.style.transform = `rotate(${rotate.toFixed(1)}deg)`;
+        img.style.zIndex = String(Math.floor(Math.random() * 5));
+        img.onerror = function () { this.remove(); };
+
+        container.appendChild(img);
+      }
+    }
+
+    function normalizeUrl(rawUrl) { const trimmed = (rawUrl || '').trim(); if (!trimmed) return '#'; if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith('/') || trimmed.startsWith('./') || trimmed.startsWith('../')) return trimmed; return 'https://' + trimmed; }
+    function escapeHtml(str) { return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+    function renderSocialMedia() {
+      const container = document.getElementById('socialMediaGrid'); if (!container) return;
+      container.innerHTML = OWNER_SOCIAL_ITEMS.map(item => `
+          <a href="${escapeHtml(normalizeUrl(item.url))}" target="_blank" rel="noopener noreferrer" dir="${currentLang === 'ar' ? 'rtl' : 'ltr'}" class="glass-card rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3 group">
+            <div class="min-w-0"><div class="text-sm font-semibold text-white truncate">${escapeHtml(item.platform)}</div><div class="text-xs text-zinc-400 truncate mt-0.5">${escapeHtml(item.handle)}</div></div>
+            <span class="text-xs text-zinc-400 group-hover:text-white transition shrink-0">↗</span>
+          </a>`).join('');
+    }
+
+    function renderTools() {
+      const container = document.getElementById('toolsGrid'); if (!container) return;
+      container.innerHTML = OWNER_TOOLS_ITEMS.map((item, idx) => {
+        const title = currentLang === 'ar' ? (item.titleAr || item.titleEn) : (item.titleEn || item.titleAr);
+        const desc = currentLang === 'ar' ? (item.descAr || item.descEn) : (item.descEn || item.descAr);
+        return `
+          <a href="${escapeHtml(normalizeUrl(item.downloadUrl))}" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl overflow-hidden flex flex-col group block text-start">
+            <div class="w-full aspect-[16/9] bg-zinc-950 overflow-hidden border-b border-white/10"><img src="${escapeHtml(item.imageUrl || `https://placehold.co/800x460/121216/ffffff?text=TOOL+${idx + 1}`)}" alt="${escapeHtml(title)}" class="w-full h-full object-cover block group-hover:scale-[1.03] transition duration-300" onerror="this.onerror=null;this.src='https://placehold.co/800x460/121216/ffffff?text=TOOL+${idx + 1}';" /></div>
+            <div class="p-4 flex-1 flex flex-col justify-between gap-2.5"><div><div class="text-sm font-bold text-white group-hover:underline truncate">${escapeHtml(title)}</div>${desc ? `<p class="text-xs text-zinc-400 mt-1 line-clamp-2">${escapeHtml(desc)}</p>` : ''}</div><div class="text-xs font-medium text-zinc-300 group-hover:text-white transition pt-1">${escapeHtml(t().downloadCta)}</div></div>
+          </a>`;
+      }).join('');
+    }
+
+    function renderLinks() {
+      const container = document.getElementById('linksList'); if (!container) return;
+      container.innerHTML = OWNER_LINKS_ITEMS.map(item => {
+        const normalized = normalizeUrl(item.url);
+        const label = currentLang === 'ar' ? (item.titleAr || item.titleEn) : (item.titleEn || item.titleAr);
+        return `
+          <div class="glass-card rounded-2xl px-4 py-3.5 flex items-center justify-between gap-3">
+            <a href="${escapeHtml(normalized)}" target="_blank" rel="noopener noreferrer" class="min-w-0 flex-1 group"><div class="text-sm font-semibold text-white group-hover:underline truncate">${escapeHtml(label)}</div><div class="text-xs text-zinc-400 truncate mt-0.5">${escapeHtml(normalized)}</div></a>
+            <button type="button" onclick="copyToClipboard('${escapeHtml(normalized)}')" class="px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-white hover:text-black border border-white/15 text-xs text-zinc-200 cursor-pointer transition shrink-0">${escapeHtml(t().copyBtn)}</button>
+          </div>`;
+      }).join('');
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang === 'en' ? 'en' : 'ar';
+      const strings = t(); const hero = HERO_CONTENT[currentLang];
+      document.documentElement.lang = strings.lang; document.documentElement.dir = strings.dir;
+      const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      document.getElementById('heroHeadline').innerHTML = hero.titleHtml; setText('heroSubtitle', hero.subtitle);
+      document.getElementById('scrollDownPrompt').innerHTML = `<span>${escapeHtml(strings.scrollDown)}</span><span aria-hidden="true">↓</span>`;
+      setText('socialKicker', strings.socialKicker); setText('socialHeading', strings.socialHeading); setText('socialDesc', strings.socialDesc);
+      setText('toolsKicker', strings.toolsKicker); setText('toolsHeading', strings.toolsHeading); setText('toolsDesc', strings.toolsDesc);
+      setText('linksKicker', strings.linksKicker); setText('linksHeading', strings.linksHeading); setText('linksDesc', strings.linksDesc);
+      setText('footerBrandText', strings.footerBrand); setText('backToTopLink', strings.backToTop);
+      setText('sysValueName', currentLang === 'ar' ? MAIN_SYS_PROFILE.nameAr : MAIN_SYS_PROFILE.nameEn);
+      setText('sysValueCodename', MAIN_SYS_PROFILE.codename);
+      setText('sysValueClass', currentLang === 'ar' ? MAIN_SYS_PROFILE.classAr : MAIN_SYS_PROFILE.classEn);
+      setText('sysValueLocation', currentLang === 'ar' ? MAIN_SYS_PROFILE.locationAr : MAIN_SYS_PROFILE.locationEn);
+      setText('ctxMenuHeader', strings.ctxHeader); setText('ctxLangLabel', strings.ctxLangLabel); setText('ctxLangBadge', strings.ctxLangBadge);
+      setText('ctxDiscordText', strings.ctxDiscordLabel); setText('ctxGoUpLabel', strings.ctxGoUpLabel);
+      renderSocialMedia(); renderTools(); renderLinks();
+    }
+
+    function toggleLanguage() { applyLanguage(currentLang === 'ar' ? 'en' : 'ar'); hideContextMenu(); showToast(t().toastLangSwitched); }
+    function handleDiscordContextAction() { copyToClipboard(DISCORD_CONFIG.handle, t().toastDiscordCopied); if (DISCORD_CONFIG.url) window.open(normalizeUrl(DISCORD_CONFIG.url), '_blank'); hideContextMenu(); }
+    function scrollToTopFromMenu() { hideContextMenu(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    function hideContextMenu() { document.getElementById('customContextMenu').classList.add('hidden'); }
+
+    function setupContextMenu() {
+      const menu = document.getElementById('customContextMenu');
+      document.addEventListener('contextmenu', (e) => {
+        e.preventDefault(); menu.classList.remove('hidden');
+        const rect = menu.getBoundingClientRect(); const pad = 10;
+        let x = e.clientX, y = e.clientY;
+        if (x + rect.width > window.innerWidth - pad) x = window.innerWidth - rect.width - pad;
+        if (y + rect.height > window.innerHeight - pad) y = window.innerHeight - rect.height - pad;
+        menu.style.left = `${Math.max(pad, x)}px`; menu.style.top = `${Math.max(pad, y)}px`;
+      });
+      document.addEventListener('click', (e) => { if (!menu.contains(e.target)) hideContextMenu(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'F1') { e.preventDefault(); toggleLanguage(); } if (e.key === 'Escape') hideContextMenu(); });
+      window.addEventListener('scroll', hideContextMenu, { passive: true });
+    }
+
+    function copyToClipboard(text, msg) {
+      const el = document.createElement('textarea'); el.value = text; document.body.appendChild(el); el.select();
+      try { document.execCommand('copy'); showToast(msg || 'Copied'); } catch (err) { showToast('Failed'); }
+      document.body.removeChild(el);
+    }
+
+    let toastTimer;
+    function showToast(msg) {
+      const b = document.getElementById('toastBanner'), l = document.getElementById('toastText');
+      l.textContent = msg; b.classList.remove('hidden'); b.classList.add('flex');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => { b.classList.add('hidden'); b.classList.remove('flex'); }, 2200);
+    }
+
+    function initSnowCanvas() {
+      const canvas = document.getElementById('snowCanvas'); if (!canvas) return;
+      const ctx = canvas.getContext('2d'); let w, h, dpr = Math.min(window.devicePixelRatio || 1, 2), dots = [];
+      const rand = (min, max) => min + Math.random() * (max - min);
+      const makeDot = (ry=true) => ({ x: rand(0, w), y: ry ? rand(0, h) : rand(-20, -2), r: rand(1, 3), vy: rand(0.3, 0.9), phase: rand(0, Math.PI * 2), drift: rand(0.01, 0.02), amp: rand(0.4, 0.8), alpha: rand(0.2, 0.8) });
+      const resize = () => { w = window.innerWidth; h = window.innerHeight; canvas.width = w * dpr; canvas.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); };
+      const render = () => {
+        ctx.clearRect(0, 0, w, h); ctx.shadowBlur = 5; ctx.shadowColor = 'rgba(255,255,255,0.8)';
+        dots.forEach((d, i) => {
+          d.phase += d.drift; d.y += d.vy; d.x += Math.sin(d.phase) * d.amp;
+          if (d.y > h) { dots[i] = makeDot(false); dots[i].x = rand(0, w); }
+          ctx.beginPath(); ctx.arc(d.x, d.y, d.r, 0, Math.PI * 2); ctx.fillStyle = `rgba(255,255,255,${d.alpha})`; ctx.fill();
+        });
+        requestAnimationFrame(render);
+      };
+      resize(); dots = Array.from({ length: 100 }, () => makeDot()); render(); window.addEventListener('resize', () => { resize(); dots = Array.from({ length: 100 }, () => makeDot()); });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('yearSpan').textContent = new Date().getFullYear();
+      if (MAIN_SYS_PROFILE.avatarUrl) document.getElementById('heroAvatarImage').src = MAIN_SYS_PROFILE.avatarUrl;
+      if (SOCIAL_SIDE_IMAGE_URL) document.getElementById('socialSideImage').src = SOCIAL_SIDE_IMAGE_URL;
+      initBgCollage();
+      applyLanguage('ar'); setupContextMenu(); initSnowCanvas();
+    });
+  </script>
+</body>
+</html>
